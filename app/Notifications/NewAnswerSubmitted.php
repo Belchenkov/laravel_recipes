@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\NexmoMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -35,7 +36,7 @@ class NewAnswerSubmitted extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['mail', 'nexmo'];
     }
 
     /**
@@ -51,6 +52,12 @@ class NewAnswerSubmitted extends Notification
                     ->line("$this->name just suggested: " . $this->answer->content)
                     ->action('View All Answers', route('questions.show', $this->question->id))
                     ->line('Thank you for using LaravelAnswers!');
+    }
+
+    public function toNexmo($notifiable)
+    {
+        return (new NexmoMessage())
+            ->content("$this->name just submitted an answer to your question! Check it out now!");
     }
 
     /**
