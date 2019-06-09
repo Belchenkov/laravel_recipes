@@ -2,8 +2,10 @@
 
 namespace App\Notifications;
 
+use function foo\func;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\NexmoMessage;
+use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -36,7 +38,7 @@ class NewAnswerSubmitted extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail', 'nexmo'];
+        return ['mail', 'nexmo', 'slack'];
     }
 
     /**
@@ -58,6 +60,25 @@ class NewAnswerSubmitted extends Notification
     {
         return (new NexmoMessage())
             ->content("$this->name just submitted an answer to your question! Check it out now!");
+    }
+
+    public function toSlack($notifiable)
+    {
+        $url = route('question.show', $this->question->id);
+
+        return (new SlackMessage())
+            ->from('Laravel Answers Bot', ':robot_face:')
+            ->to('#random')
+            ->content("$this->name just submitted an answer to your question! Check it out now!")
+            ->attachment(function ($attachment) use ($url) {
+                $attachment->title($this->question->title, $url)
+                ->fields([
+                    'Question Title' => $this->question->title,
+                    'Submitter\'s Name' => $this->name,
+                    'Answer' => $this->answer->content,
+                    'Validated User' => ':+1:'
+                ]);
+            });
     }
 
     /**
