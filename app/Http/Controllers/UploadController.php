@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class UploadController extends Controller
 {
@@ -11,8 +13,11 @@ class UploadController extends Controller
         return view('upload');
     }
 
-    public function postUpload()
+    public function postUpload(Request $request)
     {
+        $file = $request->file('picture');
+        Storage::disk('public')->put($file->getClientOriginalName(), File::get($file));
 
+        return redirect('/');
     }
 }
