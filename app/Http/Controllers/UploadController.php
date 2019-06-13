@@ -19,11 +19,14 @@ class UploadController extends Controller
         $user = Auth::user();
         $file = $request->file('picture');
         $filename = uniqid($user->id . "_").".".$file->getClientOriginalExtension();
-        Storage::disk('public')->put($filename, File::get($file));
+        //Storage::disk('public')->put($filename, File::get($file));
+        Storage::disk('s3')->put($filename, File::get($file), 'public');
 
-        $user->profile_pic = $filename;
+        $url = Storage::disk('s3')->url($filename);
+        //$user->profile_pic = $filename;
+        $user->profile_pic = $url;
         $user->save();
 
-        return redirect('/');
+        return view('upload-complete')->with('filename', $filename)->with('url', $url);
     }
 }
