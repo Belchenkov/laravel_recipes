@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class UploadController extends Controller
 {
@@ -26,6 +27,11 @@ class UploadController extends Controller
         //$user->profile_pic = $filename;
         $user->profile_pic = $url;
         $user->save();
+
+        // create the thumbnail and save it
+        $thumb = Image::make($file);
+        $thumb->fit(200);
+        $jpg = (string) $thumb->encode('jpg');
 
         return view('upload-complete')->with('filename', $filename)->with('url', $url);
     }
