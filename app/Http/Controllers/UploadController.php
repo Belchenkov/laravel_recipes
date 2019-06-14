@@ -33,6 +33,16 @@ class UploadController extends Controller
         $thumb->fit(200);
         $jpg = (string) $thumb->encode('jpg');
 
+        $thumbName = pathinfo($filename, PATHINFO_FILENAME);
+        Storage::disk('s3')->put($thumbName, $jpg, 'public');
+
         return view('upload-complete')->with('filename', $filename)->with('url', $url);
+    }
+
+    public function getThumbnailAttribute()
+    {
+
+        $path = pathinfo($this->profile_pic);
+        return $path['dirname'] . '/' . $path['filename'] . "-thumb.jpg";
     }
 }
